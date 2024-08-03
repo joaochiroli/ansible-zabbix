@@ -17,7 +17,7 @@ The main idea was to use as much tools as I could:
 - Vagrant create 4 vms
 - Ansible install and configure this vms
 - 3 vms will work together (PostgreSQL + Zabbix Server + Nginx) for to form the infrastructure monitoring
-- 1 vm up a application
+- 1 vm of application
 - Use Zabbix API to up the 3 Zabbix agents with out interface web
 - Monitoring this Application with Glowroot
 
