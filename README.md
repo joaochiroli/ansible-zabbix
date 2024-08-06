@@ -10,6 +10,7 @@ The main idea was to use as much tools as I could:
 - PostgreSQL with TimescaleDB
 - Zabbix API
 - Debian
+- Bash
 
 ## How does it work?
 
