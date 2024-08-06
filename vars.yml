@@ -1,0 +1,14 @@
+packages:
+   - htop
+   - vim
+   - wget
+   - net-tools
+   - postgresql-client  
+   - python3
+   - python3-psycopg2
+variables:
+   - LANGUAGE=en_US.UTF-8
+   - LANG=en_US.UTF-8
+   - LC_ALL=en_US.UTF-8
+
+
