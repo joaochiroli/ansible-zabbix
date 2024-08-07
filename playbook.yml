@@ -100,9 +100,6 @@
           - postgresql-contrib-16
         state: latest
 
-         
-
-
     - name: DB | Liberações de Network
       ansible.builtin.replace:
         path: /etc/postgresql/16/main/pg_hba.conf
@@ -113,19 +110,24 @@
         - { regexp: 'host    all             all             ::1/128                 scram-sha-256', replace: 'host    all             all             ::1/128                 md5' }
       
     - name: Restart PostgreSQL service
-      service:
+      ansible.builtin.service:
         name: postgresql
         state: restarted
     
     - name: Set listen_addresses
       ansible.builtin.replace:
         path: /etc/postgresql/16/main/postgresql.conf
-        regexp: '^#listen_addresses.*'
-        replace: "listen_addresses = '*'"
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.replace }}"
+      loop:
+          - { regexp: "^#listen_addresses.*", replace: "listen_addresses = '*'" } 
+          - { regexp: "^max_connections.*", replace: "max_connections = 200" }
+          - { regexp: "^#superuser_reserved_connections.*", replace: "superuser_reserved_connections = 10" }
       
     - name: Restart PostgreSQL service
-      service:
+      ansible.builtin.service:
         name: postgresql
+        enabled: yes
         state: restarted
 
 - name: Implement Database 
@@ -157,13 +159,11 @@
     - name: Create the Zabbix database
       command: sudo -u postgres createdb -O zabbix -E Unicode -T template0 zabbix
 
-    - name: Enable/Start Zabbix Agent
-      systemd:
-        name: "{{ item }}"  
+    - name: Enable/Start DB
+      ansible.builtin.service:
+        name: postgresql 
         enabled: yes
         state: restarted
-      loop:
-        - postgresql
 
 - name: Install Zabbix Server
   hosts: zabbix_server
@@ -202,6 +202,12 @@
         - { regexp: '# DBPassword=', replace: 'DBPassword=password' }
         - { regexp: '# DBHost=localhost', replace: 'DBHost=192.168.15.10' }
       
+    - name: Enable/Start DB
+      ansible.builtin.service:
+        name: zabbix-server 
+        enabled: yes
+        state: started
+
 - name: Install Nginx
   hosts: nginx
   become: yes
@@ -242,7 +248,7 @@
 
 
     - name: Enable/Start Web
-      systemd:
+      ansible.builtin.service:
         name: "{{ item }}"
         enabled: yes
         state: started
@@ -251,7 +257,7 @@
         - php8.2-fpm
 
     - name: Restart Web
-      systemd:
+      ansible.builtin.service:
         name: "{{ item }}"
         state: restarted
       loop:
@@ -269,11 +275,23 @@
   tasks:
 
     - name: Restart Agent
-      systemd:
-        name: "{{ item }}"
+      ansible.builtin.service:
+        name: zabbix-agent
         state: restarted
-      loop:
-        - zabbix-agent
 
+- name: Implement Database 
+  hosts: db
+  become: yes
+  tags: db2
+  vars_files: /etc/ansible/vars.yml
+  vars:
+    ansible_user: vagrant
+    ansible_become_user: root
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  tasks:
 
+    - name: Restart Agent
+      ansible.builtin.service:
+        name: postgresql
+        state: restarted
 ...
