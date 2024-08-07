@@ -165,6 +165,43 @@
       loop:
         - postgresql
 
+- name: Install Zabbix Server
+  hosts: zabbix_server
+  become: yes
+  tags: zabbix_server
+  vars_files: /etc/ansible/vars.yml
+  vars:
+    ansible_user: vagrant
+    ansible_become_user: root
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  tasks:
+
+    - name: Install zabbix-server-pgsql/zabbix-sql-scripts/zabbix-agent
+      apt:
+        name:  
+          - zabbix-server-pgsql
+          - zabbix-sql-scripts
+        state: present
+        update_cache: yes
+    
+    
+    - name: Import Zabbix database schema
+      shell: |
+        zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | psql -h 192.168.15.10 -U zabbix -d zabbix
+      environment:
+        PGPASSWORD: "password"
+      args:
+        executable: /bin/bash
+
+    - name: Zabbix Server | Change
+      ansible.builtin.replace:
+        path: /etc/zabbix/zabbix_server.conf
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.replace }}"
+      loop:
+        - { regexp: '# DBPassword=', replace: 'DBPassword=password' }
+        - { regexp: '# DBHost=localhost', replace: 'DBHost=192.168.15.10' }
+      
 - name: Install Nginx
   hosts: nginx
   become: yes
@@ -193,7 +230,7 @@
         replace: "{{ item.replace }}"
       loop:
         - { regexp: '#        listen          8080;', replace: '        listen          80;' }
-        - { regexp: '#        server_name     example.com;', replace: '         server_name     192.168.15.12;' }
+        - { regexp: '#        server_name     example.com;', replace: '        server_name     192.168.15.12;' }
  
     - name: Web | Change Web 2
       ansible.builtin.replace:
@@ -202,7 +239,6 @@
         replace: "{{ item.replace }}"
       loop:
         - { regexp: ';date.timezone =', replace: 'date.timezone = America/Sao_Paulo' } 
-
 
 
     - name: Enable/Start Web
@@ -214,10 +250,17 @@
         - nginx
         - php8.2-fpm
 
-- name: Install Zabbix Server
-  hosts: zabbix_server
+    - name: Restart Web
+      systemd:
+        name: "{{ item }}"
+        state: restarted
+      loop:
+        - nginx
+        - php8.2-fpm
+
+- name: Restart Zabbix Agent
+  hosts: all
   become: yes
-  tags: zabbix_server
   vars_files: /etc/ansible/vars.yml
   vars:
     ansible_user: vagrant
@@ -225,30 +268,11 @@
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
 
-    - name: Install zabbix-server-pgsql/zabbix-sql-scripts/zabbix-agent
-      apt:
-        name:  
-          - zabbix-server-pgsql
-          - zabbix-sql-scripts
-        state: present
-        update_cache: yes
-    
-    
-    #- name: Import Zabbix database schema
-    #  shell: |
-    #    zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | psql -h 192.168.15.10 -U zabbix -d zabbix
-    #  environment:
-    #    PGPASSWORD: "password"
-    #  args:
-    #    executable: /bin/bash
-
-    - name: Zabbix Server | Change
-      ansible.builtin.replace:
-        path: /etc/zabbix/zabbix_server.conf
-        regexp: "{{ item.regexp }}"
-        replace: "{{ item.replace }}"
+    - name: Restart Agent
+      systemd:
+        name: "{{ item }}"
+        state: restarted
       loop:
-        - { regexp: '# DBPassword=', replace: 'DBPassword=password' }
-        - { regexp: '# DBHost=localhost', replace: 'DBHost=192.168.15.10' }
-      
+        - zabbix-agent
+
 ...
