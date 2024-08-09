@@ -24,6 +24,9 @@ The main idea was to use as much tools as I could:
 The Goal is create a environment with Ansible and explore Zabbix API
 
 
+
+## After Installation
+
 ```
 #### Acessar a página Web e realizar as configurações.
 #### Além disso editar o arquivo vi /etc/zabbix/web/zabbix.conf.php
