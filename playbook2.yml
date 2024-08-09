@@ -4,13 +4,9 @@
   hosts: zabbix_server
   become: yes
   vars_files: /etc/ansible/vars.yml
-  vars:
-    ansible_user: vagrant
-    ansible_become_user: root
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
 
-  - name: Enable/Start Zabbix Agent
+  - name: Stop Zabbix Agent
     systemd:
         name: "zabbix-server" 
         state: stopped
@@ -19,10 +15,6 @@
   hosts: db
   become: yes
   vars_files: /etc/ansible/vars.yml
-  vars:
-    ansible_user: vagrant
-    ansible_become_user: root
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
     
     #- name: Add PostgreSQL repository 1
@@ -71,10 +63,6 @@
   hosts: zabbix_server
   become: yes
   vars_files: /etc/ansible/vars.yml
-  vars:
-    ansible_user: vagrant
-    ansible_become_user: root
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
 
     - name: Import Zabbix database schema

@@ -4,10 +4,6 @@
   hosts: all
   become: yes
   vars_files: /etc/ansible/vars.yml
-  vars:
-    ansible_user: vagrant
-    ansible_become_user: root
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
 
     - name: Copiar chave pública SSH para o usuário vagrant
@@ -73,10 +69,6 @@
   become: yes
   tags: db
   vars_files: /etc/ansible/vars.yml
-  vars:
-    ansible_user: vagrant
-    ansible_become_user: root
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
 
     - name: Add PostgreSQL APT key
@@ -130,18 +122,6 @@
         enabled: yes
         state: restarted
 
-- name: Implement Database 
-  hosts: db
-  become: yes
-  tags: db2
-  vars_files: /etc/ansible/vars.yml
-  vars:
-    ansible_user: vagrant
-    ansible_become_user: root
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
-  tasks:
-    
-
     - name: Install packages
       ansible.builtin.apt:
         name: expect
@@ -170,10 +150,6 @@
   become: yes
   tags: zabbix_server
   vars_files: /etc/ansible/vars.yml
-  vars:
-    ansible_user: vagrant
-    ansible_become_user: root
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
 
     - name: Install zabbix-server-pgsql/zabbix-sql-scripts/zabbix-agent
@@ -213,10 +189,6 @@
   become: yes
   vars_files: /etc/ansible/vars.yml
   tags: nginx
-  vars:
-    ansible_user: vagrant
-    ansible_become_user: root
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
 
     - name: Install packages zabbix front
@@ -268,13 +240,9 @@
   hosts: all
   become: yes
   vars_files: /etc/ansible/vars.yml
-  vars:
-    ansible_user: vagrant
-    ansible_become_user: root
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
 
-    - name: Restart Agent
+    - name: Restart Agent All Servers
       ansible.builtin.service:
         name: zabbix-agent
         state: restarted
@@ -284,13 +252,9 @@
   become: yes
   tags: db2
   vars_files: /etc/ansible/vars.yml
-  vars:
-    ansible_user: vagrant
-    ansible_become_user: root
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
 
-    - name: Restart Agent
+    - name: Restart Postgresql
       ansible.builtin.service:
         name: postgresql
         state: restarted
