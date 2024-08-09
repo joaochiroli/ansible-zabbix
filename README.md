@@ -27,18 +27,19 @@ The Goal is create a environment with Ansible and explore Zabbix API
 
 #### Steps to execute
 
-Run
-```
-ansible-playbook playbook.yml
+Step 1 
+- Run
+    ```
+    ansible-playbook playbook.yml
 
-```
+    ```
 
-After Run
-```
- Access the web pag and do the configurations.
- Edit the file vi /etc/zabbix/web/zabbix.conf.php
- Delete $ZBX_SERVER_NAME = '';
- Add $ZBX_SERVER = '192.168.15.8';
- Restart ningx service
+- After Run
+    ```
+    Access the web pag and do the configurations.
+    Edit the file vi /etc/zabbix/web/zabbix.conf.php
+    Delete $ZBX_SERVER_NAME = '';
+    Add $ZBX_SERVER = '192.168.15.8';
+    Restart ningx service
 
-```
+    ```
