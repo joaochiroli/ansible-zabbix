@@ -27,7 +27,7 @@ The Goal is create a environment with Ansible and explore Zabbix API
 
 #### Steps to execute
 
-Step 1 
+
 - Run
     ```
     ansible-playbook playbook.yml
