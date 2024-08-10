@@ -62,4 +62,14 @@ Nginx - 192.168.15.12
     ./zabbix_script.sh
     ```
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/af6c9ad4-3273-407a-91ba-300cec175633" width="600"/>
+</p>
     
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6bc53c01-45cb-494d-9e1c-286842a082e2" width="600"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4a78f02e-839c-431a-980e-fa10c5b494c5" width="600"/>
+</p>
