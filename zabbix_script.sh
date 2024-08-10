@@ -1,5 +1,18 @@
 #!/bin/bash
 
+token=$(curl --silent --location 'http://192.168.15.12/api_jsonrpc.php' \
+--header 'Content-Type: application/json' \
+--data '{
+    "jsonrpc": "2.0",
+    "method": "user.login",
+    "params": {
+        "username": "Admin",
+        "password": "zabbix"
+    },
+    "id": 1,
+    "auth": null
+}' | jq -r '.result')
+
 
 echo "Quantos hosts serão adicionados?"
 read numero_hosts
@@ -16,15 +29,15 @@ do
     # Chamada ao API com curl
     curl --silent --location 'http://192.168.15.12/api_jsonrpc.php' \
     --header 'Content-Type: application/json' \
-    --data '{
-        "jsonrpc": "2.0",
-        "method": "hostgroup.get",
-        "params": {
-            "output": ["name","groupid"]
+    --data "{
+        \"jsonrpc\": \"2.0\",
+        \"method\": \"hostgroup.get\",
+        \"params\": {
+            \"output\": [\"name\",\"groupid\"]
         },
-        "auth": "4c67e35e1f544115bfbe1b4908ee2b96",
-        "id": 1
-    }' | jq -r '.result[] | "[groupid: \"\(.groupid)\", name: \"\(.name)\"]"'
+        \"auth\": \"$token\",
+        \"id\": 1
+    }" | jq -r '.result[] | "[groupid: \"\(.groupid)\", name: \"\(.name)\"]"'
 
     echo "Qual o grupo esse servidor deve fazer parte? Coloque o número do groupid escolhido, exemplo: 6"
     read grupo
@@ -32,15 +45,16 @@ do
     # Chamada ao API com curl
     curl --silent --location 'http://192.168.15.12/api_jsonrpc.php' \
     --header 'Content-Type: application/json' \
-    --data '{
-        "jsonrpc": "2.0",
-        "method": "template.get",
-        "params": {
-            "output": ["name","templateid"]
-    },
-    "auth": "4c67e35e1f544115bfbe1b4908ee2b96",
-    "id": 1
-    }' | jq -r '.result[] | "[templateid: \"\(.templateid)\", name: \"\(.name)\"]"'
+    --data "{
+        \"jsonrpc\": \"2.0\",
+        \"method\": \"template.get\",
+        \"params\": {
+            \"output\": [\"name\",\"templateid\"]
+        },
+        \"auth\": \"$token\",
+        \"id\": 1
+    }" | jq -r '.result[] | "[templateid: \"\(.templateid)\", name: \"\(.name)\"]"'
+
 
     echo "Qual o template esse servidor deve ter? Coloque o número do templateid escolhido, exemplo: 10001"
     read template
@@ -73,7 +87,7 @@ do
             }
         ]
     },
-    \"auth\": \"4c67e35e1f544115bfbe1b4908ee2b96\",
+    \"auth\": \"$token\",
     \"id\": 1
     }" > /dev/null 2>&1
 
