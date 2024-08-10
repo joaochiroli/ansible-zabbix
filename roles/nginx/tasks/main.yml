@@ -1,0 +1,47 @@
+---
+
+- name: Install packages zabbix front
+  apt:
+    name:
+      - zabbix-frontend-php 
+      - php8.2-pgsql 
+      - zabbix-nginx-conf
+    state: present
+    update_cache: yes
+
+- name: Web | Change Web
+  ansible.builtin.replace:
+    path: /etc/zabbix/nginx.conf
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  loop:
+    - { regexp: '#        listen          8080;', replace: '        listen          80;' }
+    - { regexp: '#        server_name     example.com;', replace: '        server_name     192.168.15.12;' }
+
+- name: Web | Change Web 2
+  ansible.builtin.replace:
+    path: /etc/php/8.2/fpm/php.ini
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  loop:
+    - { regexp: ';date.timezone =', replace: 'date.timezone = America/Sao_Paulo' }
+
+- name: Enable/Start Web
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  loop:
+    - nginx
+    - php8.2-fpm
+
+- name: Restart Web
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - nginx
+    - php8.2-fpm
+
+
+...

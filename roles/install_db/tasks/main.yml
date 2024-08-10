@@ -1,0 +1,77 @@
+---
+
+- name: Add PostgreSQL APT key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: Add PostgreSQL repository
+  shell: |
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install packages
+  ansible.builtin.apt:
+    name: 
+      - postgresql-16
+      - postgresql-contrib-16
+    state: latest
+
+- name: DB | Liberações de Network
+  ansible.builtin.replace:
+    path: /etc/postgresql/16/main/pg_hba.conf
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  loop:
+    - { regexp: 'host    all             all             127.0.0.1/32            scram-sha-256', replace: 'host    all             all             0.0.0.0/0               md5' } 
+    - { regexp: 'host    all             all             ::1/128                 scram-sha-256', replace: 'host    all             all             ::1/128                 md5' }
+
+- name: Restart PostgreSQL service
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+
+- name: Set listen_addresses
+  ansible.builtin.replace:
+    path: /etc/postgresql/16/main/postgresql.conf
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  loop:
+    - { regexp: "^#listen_addresses.*", replace: "listen_addresses = '*'" } 
+    - { regexp: "^max_connections.*", replace: "max_connections = 200" }
+    - { regexp: "^#superuser_reserved_connections.*", replace: "superuser_reserved_connections = 10" }
+
+- name: Restart PostgreSQL service
+  ansible.builtin.service:
+    name: postgresql
+    enabled: yes
+    state: restarted
+
+- name: Install packages
+  ansible.builtin.apt:
+    name: expect
+    state: latest
+
+- name: Copy the expect script to the target
+  ansible.builtin.copy:
+    src: /etc/ansible/roles/install_db/files/create_zabbix_user.sh
+    dest: /tmp/create_zabbix_user.sh
+    mode: '0755'
+
+- name: Run the create_zabbix_user.sh script
+  command: /tmp/create_zabbix_user.sh
+
+- name: Create the Zabbix database
+  command: sudo -u postgres createdb -O zabbix -E Unicode -T template0 zabbix
+
+- name: Enable/Start DB
+  ansible.builtin.service:
+    name: postgresql 
+    enabled: yes
+    state: restarted
+
+
+...

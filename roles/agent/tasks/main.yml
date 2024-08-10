@@ -1,0 +1,9 @@
+---
+
+- name: Restart Agent All Servers
+  ansible.builtin.service:
+    name: zabbix-agent
+    state: restarted
+
+
+...

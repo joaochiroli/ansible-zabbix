@@ -1,0 +1,52 @@
+---
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install packages
+  ansible.builtin.apt:
+    name: "{{ packages }}"
+    state: latest
+
+- name: Ensure LANGUAGE is set
+  lineinfile:
+    path: /etc/environment
+    line: "{{ variables }}"
+    create: yes
+
+- name: Download Zabbix repository package
+  get_url:
+    url: https://repo.zabbix.com/zabbix/7.0/debian/pool/main/z/zabbix-release/zabbix-release_7.0-2+debian12_all.deb
+    dest: /tmp/zabbix-release_7.0-2+debian12_all.deb
+
+- name: Install Zabbix repository package
+  apt:
+    deb: /tmp/zabbix-release_7.0-2+debian12_all.deb
+    state: present
+
+- name: Install Zabbix Agent
+  apt:
+    name:
+      - zabbix-agent
+    state: present
+    update_cache: yes
+
+- name: Zabbix Agent | Change
+  ansible.builtin.replace:
+    path: /etc/zabbix/zabbix_agentd.conf
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  loop:
+    - { regexp: 'Server=127.0.0.1', replace: 'Server=192.168.15.8' }
+    - { regexp: 'ServerActive=127.0.0.1', replace: '' }
+    - { regexp: 'Hostname=Zabbix server', replace: '' }
+
+- name: Enable/Start Zabbix Agent
+  systemd:
+    name: zabbix-agent
+    enabled: yes
+    state: started
+
+
+...

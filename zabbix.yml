@@ -1,0 +1,28 @@
+---
+
+- hosts: all
+  roles:
+    - zabbix_install_packages
+
+- hosts: db
+  roles:
+    - install_db
+
+- hosts: zabbix_server
+  roles:
+    - install_zabbix_server
+
+- hosts: nginx
+  roles:
+    - nginx
+
+- hosts: all
+  roles:
+    - agent
+
+- hosts: db
+  roles:
+    - database
+
+
+...

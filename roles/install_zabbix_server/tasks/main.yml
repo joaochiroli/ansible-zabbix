@@ -1,0 +1,35 @@
+---
+
+- name: Install zabbix-server-pgsql/zabbix-sql-scripts/zabbix-agent
+  apt:
+    name:  
+      - zabbix-server-pgsql
+      - zabbix-sql-scripts
+    state: present
+    update_cache: yes
+
+- name: Import Zabbix database schema
+  shell: |
+    zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | psql -h 192.168.15.10 -U zabbix -d zabbix
+  environment:
+    PGPASSWORD: "password"
+  args:
+    executable: /bin/bash
+
+- name: Zabbix Server | Change
+  ansible.builtin.replace:
+    path: /etc/zabbix/zabbix_server.conf
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  loop:
+    - { regexp: '# DBPassword=', replace: 'DBPassword=password' }
+    - { regexp: '# DBHost=localhost', replace: 'DBHost=192.168.15.10' }
+
+- name: Enable/Start DB
+  ansible.builtin.service:
+    name: zabbix-server 
+    enabled: yes
+    state: started
+
+
+...
