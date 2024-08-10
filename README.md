@@ -24,15 +24,24 @@ The main idea was to use as much tools as I could:
 The Goal is create a environment with Ansible and explore Zabbix API
 
 
+#### Hosts 
+
+```
+Zabbix Server - 192.168.15.8
+DB - 192.168.15.10
+Nginx - 192.168.15.12
+```
 
 #### Steps to execute
 
 
 - Run
     ```
-    ansible-playbook playbook.yml
-
+    ansible-playbook zabbix.yml
     ```
+
+- Configure Web with correct ips of Database and Zabbix Server
+
 
 - After Run
     ```
@@ -41,5 +50,16 @@ The Goal is create a environment with Ansible and explore Zabbix API
     Delete $ZBX_SERVER_NAME = '';
     Add $ZBX_SERVER = '192.168.15.8';
     Restart ningx service
-
     ```
+- Execute 
+    ```
+    ansible-playbook playbook2.yml
+    ```
+
+- Create zabbix hosts with script
+    ```
+    chmod +x zabbix_script.sh
+    ./zabbix_script.sh
+    ```
+
+    
